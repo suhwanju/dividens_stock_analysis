@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Investment Portfolio</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  {% if unique_tickers %}
+    <form method="GET" action="{{ url_for('investment_portfolio_page') }}">
+      <label for="ticker">Select Ticker:</label>
+      <select name="ticker" id="ticker" onchange="this.form.submit()">
+        {% for t in unique_tickers %}
+          <option value="{{ t }}" {% if t == selected_ticker %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+      {# <input type="submit" value="View Ticker"> #}
+    </form>
+    <hr>
+  {% endif %}
+
+  {% if selected_ticker and ticker_data %}
+    <h3>Details for {{ selected_ticker }}</h3>
+    
+    <h4>Summary Metrics:</h4>
+    <ul>
+      <li><strong>Total Transactions:</strong> {{ ticker_data.summary_metrics.total_transactions }}</li>
+      <li><strong>Total Invested:</strong> ${{ "%.2f"|format(ticker_data.summary_metrics.total_invested) }}</li>
+      <li><strong>Active Investment Value:</strong> ${{ "%.2f"|format(ticker_data.summary_metrics.active_invested_value) }}</li>
+      <li><strong>Realized Profit/Loss:</strong> ${{ "%.2f"|format(ticker_data.summary_metrics.realized_profit) }}</li>
+    </ul>
+
+    <h4>Active Investments ({{ selected_ticker }}):</h4>
+    {{ ticker_data.active_html | safe }}
+
+    <h4>Sold Investments ({{ selected_ticker }}):</h4>
+    {{ ticker_data.sold_html | safe }}
+
+  {% elif not unique_tickers %}
+    {# This case is handled by a flash message set in app.py #}
+    <p>Please check back later or ensure your database is populated.</p>
+  {% else %}
+    <p>Select a ticker to view its investment details.</p>
+  {% endif %}
+
+{% endblock %}

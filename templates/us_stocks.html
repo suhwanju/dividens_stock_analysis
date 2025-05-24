@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>US Stocks Page</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <hr>
+  <h3>Add New Stock</h3>
+  <form method="POST" action="{{ url_for('us_stocks_page') }}">
+      <input type="hidden" name="action" value="add_stock">
+      <label for="new_symbol">New Symbol:</label>
+      <input type="text" id="new_symbol" name="new_symbol" value="{{ request.form.new_symbol if request.form.action == 'add_stock' else '' }}">
+      <label for="new_name">New Name:</label>
+      <input type="text" id="new_name" name="new_name" value="{{ request.form.new_name if request.form.action == 'add_stock' else '' }}">
+      <input type="submit" value="Add Stock">
+  </form>
+  <hr>
+
+  <h3>Generate Stock Chart</h3>
+  <form method="POST" action="{{ url_for('us_stocks_page') }}">
+    <input type="hidden" name="action" value="get_chart">
+
+    <p>
+      <label for="symbol">Stock Symbol:</label>
+      <select id="symbol" name="symbol">
+        {% for s, n in stock_list %}
+          <option value="{{ s }}" {% if s == selected_symbol %}selected{% endif %}>{{ n }} ({{ s }})</option>
+        {% endfor %}
+      </select>
+    </p>
+
+    <p>
+      <label for="time_period">Time Period:</label>
+      <select id="time_period" name="time_period">
+        {% for period_name in time_periods %}
+          <option value="{{ period_name }}" {% if period_name == selected_period %}selected{% endif %}>{{ period_name }}</option>
+        {% endfor %}
+      </select>
+    </p>
+
+    <fieldset>
+      <legend>Technical Indicators:</legend>
+      <input type="checkbox" id="show_ma5" name="show_ma5" value="true" {% if display_options.MA5 %}checked{% endif %}> <label for="show_ma5">MA5</label>
+      <input type="checkbox" id="show_ma20" name="show_ma20" value="true" {% if display_options.MA20 %}checked{% endif %}> <label for="show_ma20">MA20</label>
+      <input type="checkbox" id="show_ma50" name="show_ma50" value="true" {% if display_options.MA50 %}checked{% endif %}> <label for="show_ma50">MA50</label>
+      <input type="checkbox" id="show_ma200" name="show_ma200" value="true" {% if display_options.MA200 %}checked{% endif %}> <label for="show_ma200">MA200</label>
+      <br>
+      <input type="checkbox" id="show_bollinger" name="show_bollinger" value="true" {% if display_options.bollinger %}checked{% endif %}> <label for="show_bollinger">Bollinger Bands</label>
+      <input type="checkbox" id="show_bb_width" name="show_bb_width" value="true" {% if display_options.bb_width %}checked{% endif %}> <label for="show_bb_width">BB Width</label>
+      <br>
+      <input type="checkbox" id="show_rsi" name="show_rsi" value="true" {% if display_options.rsi %}checked{% endif %}> <label for="show_rsi">RSI</label>
+      <input type="checkbox" id="show_daily_change" name="show_daily_change" value="true" {% if display_options.daily_change %}checked{% endif %}> <label for="show_daily_change">Daily Change</label>
+      <input type="checkbox" id="show_stochastic" name="show_stochastic" value="true" {% if display_options.stochastic %}checked{% endif %}> <label for="show_stochastic">Stochastic</label>
+      <br>
+      <input type="checkbox" id="show_vol_ma20" name="show_vol_ma20" value="true" {% if display_options.Volume_MA20 %}checked{% endif %}> <label for="show_vol_ma20">Volume MA20</label>
+      <input type="checkbox" id="show_vol_ma50" name="show_vol_ma50" value="true" {% if display_options.Volume_MA50 %}checked{% endif %}> <label for="show_vol_ma50">Volume MA50</label>
+    </fieldset>
+    
+    <p><input type="submit" value="Get Chart"></p>
+  </form>
+
+  {% if chart_html %}
+      <h2>Chart for {{ selected_symbol }} ({{ selected_period }})</h2>
+      <div>
+          {{ chart_html | safe }}
+      </div>
+  {% else %}
+      <p>Select a stock, time period, and indicators, then click "Get Chart" to display its data.</p>
+      {% if request.method == "POST" and request.form.action == "get_chart" and not chart_html %}
+        <p><em>No chart data to display for the selected options.</em></p>
+      {% endif %}
+  {% endif %}
+{% endblock %}
