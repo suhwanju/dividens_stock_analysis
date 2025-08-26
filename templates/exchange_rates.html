@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Exchange Rate Information</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="{{ url_for('exchange_rates_page') }}">
+    <p>
+      <label for="currencies">Currencies (comma-separated, e.g., USD,EUR,JPY):</label><br>
+      <input type="text" id="currencies" name="currencies" value="{{ selected_currencies_str }}" size="50">
+    </p>
+    <p>
+      <label for="max_points">Number of Days (7-90):</label><br>
+      <input type="number" id="max_points" name="max_points" min="7" max="90" value="{{ max_points_value }}">
+    </p>
+    <p>
+      <input type="submit" value="Get Exchange Rates">
+    </p>
+  </form>
+
+  {% if current_rates %}
+    <h3>Current Rates (vs KRW)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Currency</th>
+          <th>Rate</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rate_info in current_rates %}
+          <tr>
+            <td>{{ rate_info.currency }}</td>
+            <td>{{ rate_info.rate }}</td>
+            <td>{{ rate_info.delta }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {% if chart_html %}
+    <h3>Exchange Rate Trend and Volatility</h3>
+    <div>
+      {{ chart_html | safe }}
+    </div>
+  {% else %}
+    {% if request.method == "POST" %}
+        <p>Could not display chart. Please check your input or try again later.</p>
+    {% else %}
+        <p>Enter currencies and number of days, then click "Get Exchange Rates".</p>
+    {% endif %}
+  {% endif %}
+
+{% endblock %}

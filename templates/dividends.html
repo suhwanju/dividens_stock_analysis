@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Dividend Information Management</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <hr>
+  <h3>Add New Dividend</h3>
+  <form method="POST" action="{{ url_for('dividends_page') }}">
+      <p>
+        <label for="symbol">Symbol:</label>
+        <select id="symbol" name="symbol" required>
+          <option value="">Select a Symbol</option> {# Added a default empty option #}
+          {% for s in stock_symbols %}
+            <option value="{{ s }}" {% if s == request.form.symbol %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>
+        <label for="ex_date">Ex-Dividend Date:</label>
+        <input type="date" id="ex_date" name="ex_date" value="{{ request.form.ex_date }}" required>
+      </p>
+      <p>
+        <label for="pay_date">Pay Date:</label>
+        <input type="date" id="pay_date" name="pay_date" value="{{ request.form.pay_date }}" required>
+      </p>
+      <p>
+        <label for="dividend">Dividend Amount:</label>
+        <input type="number" step="0.0001" id="dividend" name="dividend" value="{{ request.form.dividend }}" required> {# Changed step to 0.0001 for finer amounts #}
+      </p>
+      <p>
+        <input type="submit" value="Add Dividend">
+      </p>
+  </form>
+  <hr>
+
+  <h3>View Dividend Records</h3>
+  <form method="GET" action="{{ url_for('dividends_page') }}">
+      <label for="filter_symbol">Filter by Symbol:</label>
+      <select id="filter_symbol" name="filter_symbol">
+          <option value="">All Symbols</option>
+          {% for s in stock_symbols %}
+              <option value="{{ s }}" {% if s == filter_symbol %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value="Filter">
+      {% if filter_symbol %}
+        <a href="{{ url_for('dividends_page') }}">Clear Filter</a>
+      {% endif %}
+  </form>
+
+  {% if dividends_html %}
+      {{ dividends_html | safe }}
+  {% else %}
+      <p>No dividend records found for the selected filter or no records exist.</p>
+  {% endif %}
+
+{% endblock %}

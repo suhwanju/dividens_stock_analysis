@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Stock Portfolio App</title>
+    <!-- Add any CSS links here, e.g., Bootstrap -->
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('us_stocks_page') }}">US Stocks</a></li>
+        <li><a href="{{ url_for('ks_stocks_page') }}">Korean Stocks</a></li>
+        <li><a href="{{ url_for('dividends_page') }}">Dividend Input</a></li>
+      </ul>
+    </nav>
+    <hr>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+    <!-- Add any JS script links here -->
+  </body>
+</html>
